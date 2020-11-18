@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <style>
+            #tbNames {
+            border: solid 2px #000;
+            }
+            #tbNames > tr > td > span{
+              /*color:rgb(0, 177, 0);*/
+            }
+        </style>
+
+    </head>
+    <body>
+        <div id ="container">
+            <h1>
+                Stock Live
+            </h1>
+            <div id = "result">
+                <table id="tbNames" border="1" cellspacing="1" style="background-color: rgb(236, 244, 255);">
+                    <tr>
+                      <td>
+
+                      </td>
+                     </tr>
+              </table>
+              <span></span>
+            </div>
+        </div>
+
+        <script>
+        var received_msg = [];
+       /* var previous = {
+        eva : 0,
+        ebr: 0,
+        evi: 0,
+        goog: 0,
+        intc: 0,
+        shld: 0,
+         tck: 0,
+         yhoo: 0,
+         lnkd: 0,
+         msft:0   
+   }*/
+    var previous = {
+        "eva" : 0,
+        "ebr": 0,
+        "evi": 0,
+        "goog": 0,
+        "intc": 0,
+        "shld": 0,
+         "tck": 0,
+         "yhoo": 0,
+         "lnkd": 0,
+         "msft":0   
+   };
+        var up1ordown0 = {"eva" : "",
+        "ebr": "",
+        "evi": "",
+        "goog": "",
+        "intc": "",
+        "shld": "",
+         "tck": "",
+         "yhoo": "",
+         "lnkd": "",
+         "msft":"" 
+        };
+        var sock = new WebSocket("ws://stocks.hulqmedia.com"); // pull the info from url using websocket
+           sock.onopen = function(event){                     // onopen is function showing connection has been established 
+               alert('Socket connected sucessfully');
+           };
+           sock.onmessage = function(event){                   // onmessage is used my receiving the messages
+              received_msg = JSON.parse(event.data);
+               onMessage(received_msg);
+           }                                                                 
+           function onMessage(received_msg1){                       
+            received_msg1 = Object.fromEntries(received_msg);    // Array converted to objects 
+            console.log(received_msg1);
+            var entries = Object.keys(received_msg1)
+            $('#tbNames').empty();                              // condition to check the stock differnce
+            for (let key in received_msg1){
+               if (previous[key] < received_msg1[key]){
+                 up1ordown0[key] = "up";
+               }else if
+                 (previous[key] > received_msg1[key]){
+              up1ordown0[key] = "down";
+               // $("#tbNames > tr > td > span").css("color","red");
+               }
+              previous[key] = received_msg1[key];            // timestamp
+              var today = new Date();
+              var h = today.getHours();
+              var m = today.getMinutes();
+              var s = today.getSeconds();
+              m = checkTime(m);
+              s = checkTime(s);   
+            }  // table
+            $("#tbNames").append("<tr><th>"+"Ticker"+"</b></th>"+"<th>"+"Price"+"</b></th>"+"<th>"+"UPorDown"+"</b></th>"+"<th>"+"Timestamp"+"</b></th></tr>"); // add timestamp if u want
+            for (let key in previous){
+               $("#tbNames").append("<tr><td>" + key + "</td><br><td>"+previous[key]+"</td><td><span>" + up1ordown0[key] + "</span></td><td>" + h + ":" + m + ":" + s+"</td></tr>");
+            }
+           }
+           function checkTime(i) {
+           if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+            return i;
+            }
+       </script>
+    </body>
+</html>
